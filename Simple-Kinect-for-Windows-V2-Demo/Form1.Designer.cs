@@ -38,14 +38,19 @@
             // 
             // previewPictureBox
             // 
+            this.previewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.previewPictureBox.Location = new System.Drawing.Point(12, 12);
             this.previewPictureBox.Name = "previewPictureBox";
             this.previewPictureBox.Size = new System.Drawing.Size(800, 600);
+            this.previewPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.previewPictureBox.TabIndex = 0;
             this.previewPictureBox.TabStop = false;
             // 
             // colorImageButton
             // 
+            this.colorImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.colorImageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.colorImageButton.Location = new System.Drawing.Point(818, 12);
             this.colorImageButton.Name = "colorImageButton";
@@ -53,9 +58,11 @@
             this.colorImageButton.TabIndex = 1;
             this.colorImageButton.Text = "Color";
             this.colorImageButton.UseVisualStyleBackColor = true;
+            this.colorImageButton.Click += new System.EventHandler(this.colorImageButton_Click);
             // 
             // depthImageButton
             // 
+            this.depthImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.depthImageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.depthImageButton.Location = new System.Drawing.Point(818, 96);
             this.depthImageButton.Name = "depthImageButton";
@@ -63,9 +70,11 @@
             this.depthImageButton.TabIndex = 2;
             this.depthImageButton.Text = "Depth";
             this.depthImageButton.UseVisualStyleBackColor = true;
+            this.depthImageButton.Click += new System.EventHandler(this.depthImageButton_Click);
             // 
             // irImageButton
             // 
+            this.irImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.irImageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.irImageButton.Location = new System.Drawing.Point(818, 180);
             this.irImageButton.Name = "irImageButton";
@@ -73,16 +82,19 @@
             this.irImageButton.TabIndex = 3;
             this.irImageButton.Text = "IR";
             this.irImageButton.UseVisualStyleBackColor = true;
+            this.irImageButton.Click += new System.EventHandler(this.irImageButton_Click);
             // 
             // snapshotButton
             // 
+            this.snapshotButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.snapshotButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 19F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.snapshotButton.Location = new System.Drawing.Point(818, 425);
+            this.snapshotButton.Location = new System.Drawing.Point(818, 534);
             this.snapshotButton.Name = "snapshotButton";
             this.snapshotButton.Size = new System.Drawing.Size(104, 78);
             this.snapshotButton.TabIndex = 4;
             this.snapshotButton.Text = "Take Picture";
             this.snapshotButton.UseVisualStyleBackColor = true;
+            this.snapshotButton.Click += new System.EventHandler(this.snapshotButton_Click);
             // 
             // Form1
             // 
@@ -96,6 +108,8 @@
             this.Controls.Add(this.previewPictureBox);
             this.Name = "Form1";
             this.Text = "Simple Kinect for Windows V2 Demo";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).EndInit();
             this.ResumeLayout(false);
 
