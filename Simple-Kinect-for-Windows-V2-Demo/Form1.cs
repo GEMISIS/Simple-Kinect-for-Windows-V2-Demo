@@ -56,14 +56,14 @@ namespace Simple_Kinect_for_Windows_V2_Demo
         private void Form1_Load(object sender, EventArgs e)
         {
             // Check whether there are Kinect sensors available and select the default one.
-            if(KinectSensor.KinectSensors.Count > 0)
+            if(KinectSensor.GetDefault() != null)
             {
-                this.sensor = KinectSensor.Default;
+                this.sensor = KinectSensor.GetDefault();
 
                 // Check that the connect was properly retrieved and is connected.
                 if(this.sensor != null)
                 {
-                    if (this.sensor.Status == KinectStatus.Connected)
+                    if ((this.sensor.KinectCapabilities & KinectCapabilities.Vision) == KinectCapabilities.Vision)
                     {
                         // Open the sensor for use.
                         this.sensor.Open();
@@ -97,33 +97,29 @@ namespace Simple_Kinect_for_Windows_V2_Demo
 
                 if (frame != null)
                 {
-                    // The frame is disposable, so make sure we state that we are using it.
-                    using (frame)
+                    try
                     {
-                        try
+                        // Then switch between the possible types of images to show, get its frame reference, then use it
+                        // with the appropriate image.
+                        switch (this.imageType)
                         {
-                            // Then switch between the possible types of images to show, get its frame reference, then use it
-                            // with the appropriate image.
-                            switch (this.imageType)
-                            {
-                                case ImageType.Color:
-                                    ColorFrameReference colorFrameReference = frame.ColorFrameReference;
-                                    useRGBAImage(colorFrameReference);
-                                    break;
-                                case ImageType.Depth:
-                                    DepthFrameReference depthFrameReference = frame.DepthFrameReference;
-                                    useDepthImage(depthFrameReference);
-                                    break;
-                                case ImageType.IR:
-                                    InfraredFrameReference irFrameReference = frame.InfraredFrameReference;
-                                    useIRImage(irFrameReference);
-                                    break;
-                            }
+                            case ImageType.Color:
+                                ColorFrameReference colorFrameReference = frame.ColorFrameReference;
+                                useRGBAImage(colorFrameReference);
+                                break;
+                            case ImageType.Depth:
+                                DepthFrameReference depthFrameReference = frame.DepthFrameReference;
+                                useDepthImage(depthFrameReference);
+                                break;
+                            case ImageType.IR:
+                                InfraredFrameReference irFrameReference = frame.InfraredFrameReference;
+                                useIRImage(irFrameReference);
+                                break;
                         }
-                        catch (Exception)
-                        {
-                            // Don't worry about exceptions for this demonstration.
-                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Don't worry about exceptions for this demonstration.
                     }
                 }
             }
@@ -144,33 +140,38 @@ namespace Simple_Kinect_for_Windows_V2_Demo
 
             if (frame != null)
             {
+                Bitmap outputImage = null;
+                System.Drawing.Imaging.BitmapData imageData = null;
+                // Next get the frame's description and create an output bitmap image.
+                FrameDescription description = frame.FrameDescription;
+                outputImage = new Bitmap(description.Width, description.Height, PixelFormat.Format32bppArgb);
+
+                // Next, we create the raw data pointer for the bitmap, as well as the size of the image's data.
+                imageData = outputImage.LockBits(new Rectangle(0, 0, outputImage.Width, outputImage.Height),
+                    ImageLockMode.WriteOnly, outputImage.PixelFormat);
+                IntPtr imageDataPtr = imageData.Scan0;
+                int size = imageData.Stride * outputImage.Height;
+
                 using (frame)
                 {
-                    // Next get the frame's description and create an output bitmap image.
-                    FrameDescription description = frame.FrameDescription;
-                    Bitmap outputImage = new Bitmap(description.Width, description.Height, PixelFormat.Format32bppArgb);
-
-                    // Next, we create the raw data pointer for the bitmap, as well as the size of the image's data.
-                    System.Drawing.Imaging.BitmapData imageData = outputImage.LockBits(new Rectangle(0, 0, outputImage.Width, outputImage.Height),
-                        ImageLockMode.WriteOnly, outputImage.PixelFormat);
-                    IntPtr imageDataPtr = imageData.Scan0;
-                    int size = imageData.Stride * outputImage.Height;
-
                     // After this, we copy the image data directly to the buffer.  Note that while this is in BGRA format, it will be flipped due
                     // to the endianness of the data.
                     if (frame.RawColorImageFormat == ColorImageFormat.Bgra)
                     {
-                        frame.CopyRawFrameDataToBuffer((uint)size, imageDataPtr);
+                        frame.CopyRawFrameDataToIntPtr(imageDataPtr, (uint)size);
                     }
                     else
                     {
-                        frame.CopyConvertedFrameDataToBuffer((uint)size, imageDataPtr, ColorImageFormat.Bgra);
+                        frame.CopyConvertedFrameDataToIntPtr(imageDataPtr, (uint)size, ColorImageFormat.Bgra);
                     }
-
-                    // Finally, unlock the output image's raw data again and create a new bitmap for the preview picture box.
-                    outputImage.UnlockBits(imageData);
-                    this.previewPictureBox.Image = outputImage;
                 }
+                // Finally, unlock the output image's raw data again and create a new bitmap for the preview picture box.
+                outputImage.UnlockBits(imageData);
+                this.previewPictureBox.Image = outputImage;
+            }
+            else
+            {
+                Console.WriteLine("Lost frame");
             }
         }
 
@@ -186,11 +187,12 @@ namespace Simple_Kinect_for_Windows_V2_Demo
             if (frame != null)
             {
                 FrameDescription description = null;
+                Bitmap outputImage = null;
                 using (frame)
                 {
                     // Next get the frame's description and create an output bitmap image.
                     description = frame.FrameDescription;
-                    Bitmap outputImage = new Bitmap(description.Width, description.Height, PixelFormat.Format32bppArgb);
+                    outputImage = new Bitmap(description.Width, description.Height, PixelFormat.Format32bppArgb);
 
                     // Next, we create the raw data pointer for the bitmap, as well as the size of the image's data.
                     System.Drawing.Imaging.BitmapData imageData = outputImage.LockBits(new Rectangle(0, 0, outputImage.Width, outputImage.Height),
@@ -213,10 +215,10 @@ namespace Simple_Kinect_for_Windows_V2_Demo
                     // Next, the new raw data is copied to the bitmap's data pointer, and the image is unlocked using its data.
                     System.Runtime.InteropServices.Marshal.Copy(rawData, 0, imageDataPtr, size);
                     outputImage.UnlockBits(imageData);
-
-                    // Finally, the image is set for the preview picture box.
-                    this.previewPictureBox.Image = outputImage;
                 }
+
+                // Finally, the image is set for the preview picture box.
+                this.previewPictureBox.Image = outputImage;
             }
         }
 
@@ -275,7 +277,7 @@ namespace Simple_Kinect_for_Windows_V2_Demo
             }
             if (this.sensor != null)
             {
-                this.sensor.Dispose();
+                this.sensor.Close();
             }
         }
 
